@@ -60,7 +60,7 @@ export default function Hero({
         id: `apt-fast-${Date.now()}`,
         fullName: fullName.trim(),
         phone: phone.trim(),
-        email: 'info@basricakiroglu.com', // fallback for quick scheduling
+        email: 'bcakiroglu@hisarhospital.com', // fallback for quick scheduling
         preferredDate: todayStr,
         preferredTime: '09:00',
         topicId,

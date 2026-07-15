@@ -138,7 +138,7 @@ export default function Contact({ language }: ContactProps) {
               <div className="flex-1 w-full h-full min-h-[300px] relative bg-navy">
                 <iframe
                   title="Dr. Basri Cakiroglu Clinic Location Map"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.8347895181744!2d29.0765377!3d40.9765239!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac793f185c7cb%3A0xe7a56113b28b704c!2zQmHEn2RhdCBDYWQuLCBLYWTEsWvDtnkvxLBzdGFuYnVs!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
+                  src={info.mapEmbedUrl}
                   className="absolute inset-0 w-full h-full border-0 filter grayscale invert contrast-125 opacity-75 hover:opacity-100 transition-opacity duration-300"
                   allowFullScreen
                   loading="lazy"

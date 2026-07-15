@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Calendar, Globe, Clock, Phone } from 'lucide-react';
+import { Menu, X, Calendar, Globe, Clock, Phone, Instagram } from 'lucide-react';
 import { Language } from '../types';
 import { uiTranslations } from '../translations';
+import { contactDetails } from '../data';
 
 interface HeaderProps {
   language: Language;
@@ -74,8 +75,21 @@ export default function Header({
             </span>
             <span className="flex items-center">
               <Phone className="w-3.5 h-3.5 text-gold mr-2" />
-              <span>+90 (216) 555 00 55</span>
+              <a href={`tel:${contactDetails.phone}`} className="hover:text-gold transition-colors">
+                {contactDetails.phoneFormatted}
+              </a>
             </span>
+            <a
+              id="header-instagram-link"
+              href="https://www.instagram.com/drbasricakiroglu/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-slate-300 hover:text-gold transition-colors text-xs"
+              title="Instagram"
+            >
+              <Instagram className="w-3.5 h-3.5 text-gold mr-1.5" />
+              <span>Instagram</span>
+            </a>
           </div>
           <div className="flex items-center space-x-4">
             <button
@@ -167,8 +181,21 @@ export default function Header({
             </button>
           </div>
 
-          {/* Mobile controls (Language + Hamburger) */}
+          {/* Mobile controls (Language + Instagram + Hamburger) */}
           <div className="flex items-center space-x-3 md:hidden">
+            {/* Instagram Link */}
+            <a
+              id="mobile-instagram-link"
+              href="https://www.instagram.com/drbasricakiroglu/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-md bg-white/5 text-gold hover:text-white hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center"
+              aria-label="Instagram"
+              title="Instagram"
+            >
+              <Instagram className="w-4 h-4" />
+            </a>
+
             {/* Simple mobile lang switch to save space */}
             <button
               id="mobile-lang-toggle"

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, ChevronUp, Shield, Globe, FileText, Phone, Lock } from 'lucide-react';
+import { Calendar, Clock, ChevronUp, Shield, Globe, FileText, Phone, Lock, Instagram } from 'lucide-react';
 import { Language, Appointment } from './types';
 import { uiTranslations } from './translations';
+import { db } from './firebase';
+import { collection, doc, setDoc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 // Import our modular components
 import Header from './components/Header';
@@ -30,7 +32,7 @@ export default function App() {
     return () => window.removeEventListener('basri-login-state-changed', handleLoginState);
   }, []);
 
-  // Persistence: Restore user's real appointments from local storage
+  // Persistence: Real-time synchronization of appointments from Firestore
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     try {
       const stored = localStorage.getItem('dr_basri_appointments');
@@ -40,10 +42,42 @@ export default function App() {
     }
   });
 
-  // Save changes to local storage
   useEffect(() => {
-    localStorage.setItem('dr_basri_appointments', JSON.stringify(appointments));
-  }, [appointments]);
+    try {
+      const q = query(
+        collection(db, 'appointments'),
+        orderBy('createdAt', 'desc')
+      );
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetched: Appointment[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          fetched.push({
+            id: docSnap.id,
+            fullName: data.fullName || '',
+            phone: data.phone || '',
+            email: data.email || '',
+            preferredDate: data.preferredDate || '',
+            preferredTime: data.preferredTime || '',
+            topicId: data.topicId || '',
+            notes: data.notes || '',
+            status: data.status || 'pending',
+            createdAt: data.createdAt || new Date().toISOString()
+          });
+        });
+
+        setAppointments(fetched);
+        localStorage.setItem('dr_basri_appointments', JSON.stringify(fetched));
+      }, (error) => {
+        console.error("Failed to load appointments from Firestore:", error);
+      });
+
+      return () => unsubscribe();
+    } catch (e) {
+      console.error("Firestore appointments init error:", e);
+    }
+  }, []);
 
   // Back to top scroll listener
   useEffect(() => {
@@ -57,15 +91,56 @@ export default function App() {
   const t = uiTranslations[language];
 
   // Callback to insert new scheduled session
-  const handleAppointmentCreated = (newApt: Appointment) => {
+  const handleAppointmentCreated = async (newApt: Appointment) => {
+    // 1. Optimistic UI update
     setAppointments((prev) => [newApt, ...prev]);
+
+    // 2. Save to Firestore
+    try {
+      await setDoc(doc(db, 'appointments', newApt.id), {
+        fullName: newApt.fullName,
+        phone: newApt.phone,
+        email: newApt.email,
+        preferredDate: newApt.preferredDate,
+        preferredTime: newApt.preferredTime,
+        topicId: newApt.topicId,
+        notes: newApt.notes || '',
+        status: newApt.status,
+        createdAt: newApt.createdAt
+      });
+    } catch (e) {
+      console.error("Failed to save appointment to Firestore:", e);
+    }
+
+    // 3. Send email notification via our backend API
+    try {
+      await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newApt)
+      });
+    } catch (e) {
+      console.error("Failed to send appointment email notification:", e);
+    }
   };
 
   // Callback to cancel an existing session
-  const handleCancelAppointment = (id: string) => {
+  const handleCancelAppointment = async (id: string) => {
+    // 1. Optimistic UI update
     setAppointments((prev) =>
       prev.map((apt) => (apt.id === id ? { ...apt, status: 'cancelled' } : apt))
     );
+
+    // 2. Update in Firestore
+    try {
+      await updateDoc(doc(db, 'appointments', id), {
+        status: 'cancelled'
+      });
+    } catch (e) {
+      console.error("Failed to cancel appointment in Firestore:", e);
+    }
   };
 
   const scrollToSection = (id: string) => {
@@ -221,10 +296,22 @@ export default function App() {
 
       {/* 9. FLOATING ACTION ACCESSORIES (BACK-TO-TOP & DIRECT-DIAL) */}
       <div className="fixed bottom-6 right-6 flex flex-col space-y-3 z-30">
+        {/* Instagram button */}
+        <a
+          id="floating-instagram-btn"
+          href="https://www.instagram.com/drbasricakiroglu/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center border border-white/10"
+          title="Instagram"
+        >
+          <Instagram className="w-5 h-5" />
+        </a>
+
         {/* Quick dial assistant button */}
         <a
           id="floating-dial-btn"
-          href="tel:+902165550055"
+          href="tel:+905332078903"
           className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center border border-emerald-400/20"
           title={language === 'TR' ? 'Hemen Arayın' : 'Call Assistant Now'}
         >

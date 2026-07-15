@@ -18,8 +18,14 @@ export default function Blog({ language }: BlogProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
   const [dbPosts, setDbPosts] = useState<BlogPost[]>([]);
+  const [showAll, setShowAll] = useState(false);
 
   const t = uiTranslations[language];
+
+  // Reset showAll when activeCategory or searchQuery changes
+  useEffect(() => {
+    setShowAll(false);
+  }, [activeCategory, searchQuery]);
 
   // Listener to open add article modal from footer
   useEffect(() => {
@@ -132,6 +138,12 @@ export default function Blog({ language }: BlogProps) {
     });
   }, [posts, activeCategory, searchQuery]);
 
+  // Limit default view to maximum 3 articles, show all when showAll is true
+  const visiblePosts = useMemo(() => {
+    if (showAll) return filteredPosts;
+    return filteredPosts.slice(0, 3);
+  }, [filteredPosts, showAll]);
+
   // Clean custom line-by-line renderer to display full clinical markdown safely
   const renderArticleContent = (content: string) => {
     return content.split('\n').map((line, idx) => {
@@ -220,66 +232,82 @@ export default function Blog({ language }: BlogProps) {
         </div>
 
         {/* Articles Cards Grid */}
-        {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
-              <article
-                key={post.id}
-                className="group card-glass p-6 sm:p-8 rounded-xl transition-all duration-300 flex flex-col justify-between font-sans relative"
-              >
-                <div>
-                  {/* Article Metadata line */}
-                  <div className="flex items-center justify-between text-slate-400 text-[11px] mb-5 font-semibold">
-                    <div className="flex items-center space-x-4">
-                      <span className="bg-gold/10 text-gold border border-gold/30 px-2.5 py-1 rounded uppercase">
-                        {post.category}
-                      </span>
-                      <span className="flex items-center">
-                        <Clock className="w-3.5 h-3.5 mr-1" />
-                        <span>{post.readTime} {t.blogReadTime}</span>
-                      </span>
+        {visiblePosts.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {visiblePosts.map((post) => (
+                <article
+                  key={post.id}
+                  className="group card-glass p-6 sm:p-8 rounded-xl transition-all duration-300 flex flex-col justify-between font-sans relative"
+                >
+                  <div>
+                    {/* Article Metadata line */}
+                    <div className="flex items-center justify-between text-slate-400 text-[11px] mb-5 font-semibold">
+                      <div className="flex items-center space-x-4">
+                        <span className="bg-gold/10 text-gold border border-gold/30 px-2.5 py-1 rounded uppercase">
+                          {post.category}
+                        </span>
+                        <span className="flex items-center">
+                          <Clock className="w-3.5 h-3.5 mr-1" />
+                          <span>{post.readTime} {t.blogReadTime}</span>
+                        </span>
+                      </div>
+
+                      {/* Delete button for user's own articles (only visible when logged in as drbasri) */}
+                      {isLoggedIn && post.id.startsWith('custom-article-') && (
+                        <button
+                          onClick={(e) => handleDeletePost(post.id, e)}
+                          className="p-1.5 text-slate-500 hover:text-red-400 bg-white/5 hover:bg-white/10 rounded border border-white/5 hover:border-red-500/20 transition-all cursor-pointer focus:outline-none"
+                          title={language === 'TR' ? 'Makaleyi Sil' : 'Delete Article'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Delete button for user's own articles (only visible when logged in as drbasri) */}
-                    {isLoggedIn && post.id.startsWith('custom-article-') && (
-                      <button
-                        onClick={(e) => handleDeletePost(post.id, e)}
-                        className="p-1.5 text-slate-500 hover:text-red-400 bg-white/5 hover:bg-white/10 rounded border border-white/5 hover:border-red-500/20 transition-all cursor-pointer focus:outline-none"
-                        title={language === 'TR' ? 'Makaleyi Sil' : 'Delete Article'}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    <h3 className="text-xl font-bold text-white group-hover:text-gold transition-colors mb-4 line-clamp-2 font-display leading-snug">
+                      {post.title}
+                    </h3>
+
+                    <p className="text-slate-400 text-xs sm:text-sm font-light leading-relaxed mb-6 line-clamp-3">
+                      {post.excerpt}
+                    </p>
                   </div>
 
-                  <h3 className="text-xl font-bold text-white group-hover:text-gold transition-colors mb-4 line-clamp-2 font-display leading-snug">
-                    {post.title}
-                  </h3>
+                  {/* Bottom line with date and reading CTA */}
+                  <div className="flex items-center justify-between pt-6 border-t border-white/10 mt-auto">
+                    <span className="text-[11px] uppercase tracking-wider text-slate-500 flex items-center">
+                      <Calendar className="w-3.5 h-3.5 mr-1" />
+                      {post.date}
+                    </span>
+                    
+                    <button
+                      id={`btn-read-${post.id}`}
+                      onClick={() => setSelectedPost(post)}
+                      className="inline-flex items-center text-xs font-bold text-gold hover:text-gold/80 cursor-pointer focus:outline-none"
+                    >
+                      <span>{t.blogReadMore}</span>
+                      <ChevronRight className="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-                  <p className="text-slate-400 text-xs sm:text-sm font-light leading-relaxed mb-6 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                </div>
-
-                {/* Bottom line with date and reading CTA */}
-                <div className="flex items-center justify-between pt-6 border-t border-white/10 mt-auto">
-                  <span className="text-[11px] uppercase tracking-wider text-slate-500 flex items-center">
-                    <Calendar className="w-3.5 h-3.5 mr-1" />
-                    {post.date}
-                  </span>
-                  
-                  <button
-                    id={`btn-read-${post.id}`}
-                    onClick={() => setSelectedPost(post)}
-                    className="inline-flex items-center text-xs font-bold text-gold hover:text-gold/80 cursor-pointer focus:outline-none"
-                  >
-                    <span>{t.blogReadMore}</span>
-                    <ChevronRight className="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+            {/* See More Toggle Button */}
+            {filteredPosts.length > 3 && (
+              <div className="flex justify-center mt-12">
+                <button
+                  id="toggle-all-articles-btn"
+                  onClick={() => setShowAll(!showAll)}
+                  className="px-8 py-3.5 bg-gold hover:bg-gold/90 text-navy font-bold text-xs rounded uppercase tracking-widest transition-all shadow-lg hover:shadow-gold/20 flex items-center space-x-2 cursor-pointer focus:outline-none"
+                >
+                  <span>{showAll ? t.blogShowLess : t.blogShowMore}</span>
+                  <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${showAll ? '-rotate-90' : 'rotate-90'}`} />
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16 bg-white/5 rounded-xl border border-dashed border-white/10">
             <p className="text-slate-400 text-xs sm:text-sm">

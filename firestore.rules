@@ -4,5 +4,8 @@ service cloud.firestore {
     match /blog_posts/{postId} {
       allow read, write: if true;
     }
+    match /appointments/{appointmentId} {
+      allow read, write: if true;
+    }
   }
 }

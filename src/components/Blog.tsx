@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
-import { Search, Calendar, User, Clock, ArrowRight, X, ChevronRight, FileText } from 'lucide-react';
+import { useState, useMemo, useEffect, MouseEvent } from 'react';
+import { Search, Calendar, User, Clock, ArrowRight, X, ChevronRight, FileText, Plus, Trash2 } from 'lucide-react';
 import { Language, BlogPost } from '../types';
 import { uiTranslations } from '../translations';
 import { getBlogPosts } from '../data';
+import AddArticleModal from './AddArticleModal';
 
 interface BlogProps {
   language: Language;
@@ -12,9 +13,69 @@ export default function Blog({ language }: BlogProps) {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
 
   const t = uiTranslations[language];
-  const posts = getBlogPosts(language);
+
+  // Listener to open add article modal from footer
+  useEffect(() => {
+    const handleOpen = () => {
+      setIsAddModalOpen(true);
+    };
+    window.addEventListener('open-add-article', handleOpen);
+    return () => window.removeEventListener('open-add-article', handleOpen);
+  }, []);
+
+  // Listener to sync login state dynamically
+  useEffect(() => {
+    const handleLoginState = (e: any) => {
+      const loggedIn = e.detail?.isLoggedIn ?? (localStorage.getItem('basri_logged_in') === 'true');
+      setIsLoggedIn(loggedIn);
+    };
+    window.addEventListener('basri-login-state-changed', handleLoginState);
+    return () => window.removeEventListener('basri-login-state-changed', handleLoginState);
+  }, []);
+
+  // Dynamic state that persists newly created articles in client's storage
+  const [posts, setPosts] = useState<BlogPost[]>(() => {
+    const saved = localStorage.getItem(`basri_cakiroglu_blog_posts_${language}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to load blog posts", e);
+      }
+    }
+    return getBlogPosts(language);
+  });
+
+  // Re-sync posts when language is switched
+  useEffect(() => {
+    const saved = localStorage.getItem(`basri_cakiroglu_blog_posts_${language}`);
+    if (saved) {
+      try {
+        setPosts(JSON.parse(saved));
+        return;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    setPosts(getBlogPosts(language));
+  }, [language]);
+
+  const handleAddPost = (newPost: BlogPost) => {
+    const updated = [newPost, ...posts];
+    setPosts(updated);
+    localStorage.setItem(`basri_cakiroglu_blog_posts_${language}`, JSON.stringify(updated));
+  };
+
+  const handleDeletePost = (postId: string, e: MouseEvent) => {
+    e.stopPropagation();
+    const updated = posts.filter((p) => p.id !== postId);
+    setPosts(updated);
+    localStorage.setItem(`basri_cakiroglu_blog_posts_${language}`, JSON.stringify(updated));
+  };
 
   // Dynamic list of unique categories in active language
   const categories = useMemo(() => {
@@ -83,7 +144,7 @@ export default function Blog({ language }: BlogProps) {
         </div>
 
         {/* Filter Toolbar (Search + Categories) */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 card-glass p-6 rounded-xl">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-12 card-glass p-6 rounded-xl">
           {/* Categories list */}
           <div className="flex flex-wrap items-center gap-2">
             {categories.map((cat) => (
@@ -102,19 +163,22 @@ export default function Blog({ language }: BlogProps) {
             ))}
           </div>
 
-          {/* Search Input bar */}
-          <div className="relative w-full md:max-w-xs shrink-0 font-sans">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Search className="w-4 h-4 text-slate-500" />
-            </span>
-            <input
-              type="text"
-              id="blog-search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={language === 'TR' ? 'Makale ara...' : 'Search articles...'}
-              className="w-full pl-10 pr-4 py-2.5 bg-white/5 text-white rounded border border-white/10 focus:outline-none focus:border-gold transition-all text-xs"
-            />
+          {/* Search Action Container (Add button removed to footer) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto font-sans">
+            {/* Search Input bar */}
+            <div className="relative w-full sm:w-80 shrink-0">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Search className="w-4 h-4 text-slate-500" />
+              </span>
+              <input
+                type="text"
+                id="blog-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={language === 'TR' ? 'Makale ara...' : 'Search articles...'}
+                className="w-full pl-10 pr-4 py-2.5 bg-white/5 text-white rounded border border-white/10 focus:outline-none focus:border-gold transition-all text-xs"
+              />
+            </div>
           </div>
         </div>
 
@@ -124,18 +188,31 @@ export default function Blog({ language }: BlogProps) {
             {filteredPosts.map((post) => (
               <article
                 key={post.id}
-                className="group card-glass p-6 sm:p-8 rounded-xl transition-all duration-300 flex flex-col justify-between font-sans"
+                className="group card-glass p-6 sm:p-8 rounded-xl transition-all duration-300 flex flex-col justify-between font-sans relative"
               >
                 <div>
                   {/* Article Metadata line */}
-                  <div className="flex items-center space-x-4 text-slate-400 text-[11px] mb-5 font-semibold">
-                    <span className="bg-gold/10 text-gold border border-gold/30 px-2.5 py-1 rounded uppercase">
-                      {post.category}
-                    </span>
-                    <span className="flex items-center">
-                      <Clock className="w-3.5 h-3.5 mr-1" />
-                      <span>{post.readTime} {t.blogReadTime}</span>
-                    </span>
+                  <div className="flex items-center justify-between text-slate-400 text-[11px] mb-5 font-semibold">
+                    <div className="flex items-center space-x-4">
+                      <span className="bg-gold/10 text-gold border border-gold/30 px-2.5 py-1 rounded uppercase">
+                        {post.category}
+                      </span>
+                      <span className="flex items-center">
+                        <Clock className="w-3.5 h-3.5 mr-1" />
+                        <span>{post.readTime} {t.blogReadTime}</span>
+                      </span>
+                    </div>
+
+                    {/* Delete button for user's own articles (only visible when logged in as drbasri) */}
+                    {isLoggedIn && post.id.startsWith('custom-article-') && (
+                      <button
+                        onClick={(e) => handleDeletePost(post.id, e)}
+                        className="p-1.5 text-slate-500 hover:text-red-400 bg-white/5 hover:bg-white/10 rounded border border-white/5 hover:border-red-500/20 transition-all cursor-pointer focus:outline-none"
+                        title={language === 'TR' ? 'Makaleyi Sil' : 'Delete Article'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
 
                   <h3 className="text-xl font-bold text-white group-hover:text-gold transition-colors mb-4 line-clamp-2 font-display leading-snug">
@@ -255,6 +332,16 @@ export default function Blog({ language }: BlogProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Article Creation Modal Overlay */}
+      {isAddModalOpen && (
+        <AddArticleModal
+          language={language}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddPost}
+          existingCategories={categories}
+        />
       )}
     </section>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, ChevronUp, Shield, Globe, FileText, Phone } from 'lucide-react';
+import { Calendar, Clock, ChevronUp, Shield, Globe, FileText, Phone, Lock } from 'lucide-react';
 import { Language, Appointment } from './types';
 import { uiTranslations } from './translations';
 
@@ -18,6 +18,17 @@ export default function App() {
   const [isAppointmentOpen, setIsAppointmentOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
+
+  // Sync login status across events
+  useEffect(() => {
+    const handleLoginState = (e: any) => {
+      const loggedIn = e.detail?.isLoggedIn ?? (localStorage.getItem('basri_logged_in') === 'true');
+      setIsLoggedIn(loggedIn);
+    };
+    window.addEventListener('basri-login-state-changed', handleLoginState);
+    return () => window.removeEventListener('basri-login-state-changed', handleLoginState);
+  }, []);
 
   // Persistence: Restore user's real appointments from local storage
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
@@ -135,36 +146,58 @@ export default function App() {
           </div>
 
           {/* Quick link tags for professional footer navigation */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs uppercase tracking-widest text-slate-400">
+          <div className="flex flex-col lg:flex-row items-center gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs uppercase tracking-widest text-slate-400">
+              <button
+                onClick={() => scrollToSection('home')}
+                className="hover:text-gold transition-colors focus:outline-none cursor-pointer"
+              >
+                {t.navHome}
+              </button>
+              <button
+                onClick={() => scrollToSection('about')}
+                className="hover:text-gold transition-colors focus:outline-none cursor-pointer"
+              >
+                {t.navAbout}
+              </button>
+              <button
+                onClick={() => scrollToSection('expertise')}
+                className="hover:text-gold transition-colors focus:outline-none cursor-pointer"
+              >
+                {t.navExpertise}
+              </button>
+              <button
+                onClick={() => scrollToSection('blog')}
+                className="hover:text-gold transition-colors focus:outline-none cursor-pointer"
+              >
+                {t.navBlog}
+              </button>
+              <button
+                onClick={() => scrollToSection('contact')}
+                className="hover:text-gold transition-colors focus:outline-none cursor-pointer"
+              >
+                {t.navContact}
+              </button>
+            </div>
+
+            {/* Author Portal Trigger */}
             <button
-              onClick={() => scrollToSection('home')}
-              className="hover:text-gold transition-colors focus:outline-none"
+              id="footer-doctor-login"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-add-article'))}
+              className="flex items-center space-x-2 px-5 py-2.5 bg-gold/10 hover:bg-gold/20 active:bg-gold/30 border border-gold/30 hover:border-gold/50 text-gold rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer focus:outline-none shrink-0"
+              title={language === 'TR' ? 'Hekim & Yazar Giriş Paneli' : 'Doctor & Author Login Portal'}
             >
-              {t.navHome}
-            </button>
-            <button
-              onClick={() => scrollToSection('about')}
-              className="hover:text-gold transition-colors focus:outline-none"
-            >
-              {t.navAbout}
-            </button>
-            <button
-              onClick={() => scrollToSection('expertise')}
-              className="hover:text-gold transition-colors focus:outline-none"
-            >
-              {t.navExpertise}
-            </button>
-            <button
-              onClick={() => scrollToSection('blog')}
-              className="hover:text-gold transition-colors focus:outline-none"
-            >
-              {t.navBlog}
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="hover:text-gold transition-colors focus:outline-none"
-            >
-              {t.navContact}
+              {isLoggedIn ? (
+                <>
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>{language === 'TR' ? 'Yazar Paneli' : 'Author Panel'}</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>{language === 'TR' ? 'Giriş' : 'Login'}</span>
+                </>
+              )}
             </button>
           </div>
         </div>

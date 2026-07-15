@@ -4,8 +4,7 @@ import { Language, BlogPost } from '../types';
 import { uiTranslations } from '../translations';
 import { getBlogPosts } from '../data';
 import AddArticleModal from './AddArticleModal';
-import { db } from '../firebase';
-import { collection, doc, setDoc, deleteDoc, onSnapshot, query, where } from 'firebase/firestore';
+import customPostsData from '../custom_posts.json';
 
 interface BlogProps {
   language: Language;
@@ -17,7 +16,10 @@ export default function Blog({ language }: BlogProps) {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
-  const [dbPosts, setDbPosts] = useState<BlogPost[]>([]);
+  const [dbPosts, setDbPosts] = useState<BlogPost[]>(() => {
+    // Start with the bundled static custom posts (for Vercel/GitHub pages)
+    return (customPostsData as BlogPost[]).filter(post => post.language === language || !post.language);
+  });
 
   const t = uiTranslations[language];
 
@@ -40,73 +42,65 @@ export default function Blog({ language }: BlogProps) {
     return () => window.removeEventListener('basri-login-state-changed', handleLoginState);
   }, []);
 
-  // Real-time synchronization of custom articles from Firestore
+  // Fetch newest posts from local JSON database in development (or if backend is running)
   useEffect(() => {
-    const q = query(
-      collection(db, 'blog_posts'),
-      where('language', '==', language)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched: { post: BlogPost; createdAt: number }[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        fetched.push({
-          post: {
-            id: doc.id,
-            title: data.title || '',
-            slug: data.slug || '',
-            excerpt: data.excerpt || '',
-            content: data.content || '',
-            date: data.date || '',
-            readTime: data.readTime || '',
-            category: data.category || '',
-            author: data.author || ''
-          },
-          createdAt: data.createdAt || 0
-        });
-      });
-      // Sort custom posts chronologically descending
-      fetched.sort((a, b) => b.createdAt - a.createdAt);
-      setDbPosts(fetched.map((item) => item.post));
-    }, (error) => {
-      console.error("Failed to load blog posts from Firestore:", error);
-    });
-
-    return () => unsubscribe();
+    let active = true;
+    async function loadDbPosts() {
+      try {
+        const res = await fetch('/api/posts');
+        if (res.ok && active) {
+          const data = await res.json();
+          // Filter by active language
+          const filtered = data.filter((post: any) => post.language === language || !post.language);
+          setDbPosts(filtered);
+        }
+      } catch (e) {
+        console.log('Using static bundled blog data.');
+      }
+    }
+    loadDbPosts();
+    return () => {
+      active = false;
+    };
   }, [language]);
 
-  // Combine Firestore posts with pre-existing hardcoded posts
+  // Combine JSON/Database posts with pre-existing hardcoded posts
   const posts = useMemo(() => {
     const defaultPosts = getBlogPosts(language);
     return [...dbPosts, ...defaultPosts];
   }, [dbPosts, language]);
 
   const handleAddPost = async (newPost: BlogPost) => {
+    const postWithLang = { ...newPost, language };
+    
+    // Optimistic UI update
+    setDbPosts(prev => [postWithLang, ...prev]);
+
     try {
-      await setDoc(doc(db, 'blog_posts', newPost.id), {
-        title: newPost.title,
-        slug: newPost.slug,
-        excerpt: newPost.excerpt,
-        content: newPost.content,
-        date: newPost.date,
-        readTime: newPost.readTime,
-        category: newPost.category,
-        author: newPost.author,
-        language: language,
-        createdAt: Date.now()
+      await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postWithLang),
       });
     } catch (e) {
-      console.error("Firestore write error:", e);
+      console.error("Failed to write post to file:", e);
     }
   };
 
   const handleDeletePost = async (postId: string, e: MouseEvent) => {
     e.stopPropagation();
+    
+    // Optimistic UI update
+    setDbPosts(prev => prev.filter(p => p.id !== postId));
+
     try {
-      await deleteDoc(doc(db, 'blog_posts', postId));
+      await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+      });
     } catch (e) {
-      console.error("Firestore delete error:", e);
+      console.error("Failed to delete post from file:", e);
     }
   };
 

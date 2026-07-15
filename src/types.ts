@@ -26,6 +26,7 @@ export interface BlogPost {
   readTime: string;
   category: string;
   author: string;
+  language?: Language;
 }
 
 export interface Appointment {

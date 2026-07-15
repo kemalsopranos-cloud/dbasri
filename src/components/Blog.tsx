@@ -4,6 +4,8 @@ import { Language, BlogPost } from '../types';
 import { uiTranslations } from '../translations';
 import { getBlogPosts } from '../data';
 import AddArticleModal from './AddArticleModal';
+import { db } from '../firebase';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, query, where } from 'firebase/firestore';
 
 interface BlogProps {
   language: Language;
@@ -15,6 +17,7 @@ export default function Blog({ language }: BlogProps) {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
+  const [dbPosts, setDbPosts] = useState<BlogPost[]>([]);
 
   const t = uiTranslations[language];
 
@@ -37,44 +40,74 @@ export default function Blog({ language }: BlogProps) {
     return () => window.removeEventListener('basri-login-state-changed', handleLoginState);
   }, []);
 
-  // Dynamic state that persists newly created articles in client's storage
-  const [posts, setPosts] = useState<BlogPost[]>(() => {
-    const saved = localStorage.getItem(`basri_cakiroglu_blog_posts_${language}`);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to load blog posts", e);
-      }
-    }
-    return getBlogPosts(language);
-  });
-
-  // Re-sync posts when language is switched
+  // Real-time synchronization of custom articles from Firestore
   useEffect(() => {
-    const saved = localStorage.getItem(`basri_cakiroglu_blog_posts_${language}`);
-    if (saved) {
-      try {
-        setPosts(JSON.parse(saved));
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    setPosts(getBlogPosts(language));
+    const q = query(
+      collection(db, 'blog_posts'),
+      where('language', '==', language)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetched: { post: BlogPost; createdAt: number }[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        fetched.push({
+          post: {
+            id: doc.id,
+            title: data.title || '',
+            slug: data.slug || '',
+            excerpt: data.excerpt || '',
+            content: data.content || '',
+            date: data.date || '',
+            readTime: data.readTime || '',
+            category: data.category || '',
+            author: data.author || ''
+          },
+          createdAt: data.createdAt || 0
+        });
+      });
+      // Sort custom posts chronologically descending
+      fetched.sort((a, b) => b.createdAt - a.createdAt);
+      setDbPosts(fetched.map((item) => item.post));
+    }, (error) => {
+      console.error("Failed to load blog posts from Firestore:", error);
+    });
+
+    return () => unsubscribe();
   }, [language]);
 
-  const handleAddPost = (newPost: BlogPost) => {
-    const updated = [newPost, ...posts];
-    setPosts(updated);
-    localStorage.setItem(`basri_cakiroglu_blog_posts_${language}`, JSON.stringify(updated));
+  // Combine Firestore posts with pre-existing hardcoded posts
+  const posts = useMemo(() => {
+    const defaultPosts = getBlogPosts(language);
+    return [...dbPosts, ...defaultPosts];
+  }, [dbPosts, language]);
+
+  const handleAddPost = async (newPost: BlogPost) => {
+    try {
+      await setDoc(doc(db, 'blog_posts', newPost.id), {
+        title: newPost.title,
+        slug: newPost.slug,
+        excerpt: newPost.excerpt,
+        content: newPost.content,
+        date: newPost.date,
+        readTime: newPost.readTime,
+        category: newPost.category,
+        author: newPost.author,
+        language: language,
+        createdAt: Date.now()
+      });
+    } catch (e) {
+      console.error("Firestore write error:", e);
+    }
   };
 
-  const handleDeletePost = (postId: string, e: MouseEvent) => {
+  const handleDeletePost = async (postId: string, e: MouseEvent) => {
     e.stopPropagation();
-    const updated = posts.filter((p) => p.id !== postId);
-    setPosts(updated);
-    localStorage.setItem(`basri_cakiroglu_blog_posts_${language}`, JSON.stringify(updated));
+    try {
+      await deleteDoc(doc(db, 'blog_posts', postId));
+    } catch (e) {
+      console.error("Firestore delete error:", e);
+    }
   };
 
   // Dynamic list of unique categories in active language

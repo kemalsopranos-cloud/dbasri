@@ -178,7 +178,7 @@ export default function Hero({
                 <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/30 to-transparent" />
                 <div className="absolute bottom-4 left-6">
                   <span className="bg-gold text-navy text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm">
-                    {language === 'TR' ? 'Op. Dr. Basri Çakıroğlu' : 'Dr. Basri Cakiroglu, MD'}
+                    {language === 'TR' ? 'PROF. DR. BASRİ ÇAKIROĞLU' : 'PROF. DR. BASRI CAKIROGLU'}
                   </span>
                 </div>
               </div>

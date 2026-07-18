@@ -4,18 +4,18 @@ import { Milestone, ExpertiseItem, BlogPost, ContactInfo } from './types';
 export const getMilestones = (lang: 'TR' | 'EN'): Milestone[] => {
   return lang === 'TR'
     ? [
-        { year: "2018 - Günümüz", title: "Üroloji Profesörü", institution: "Tıp Fakültesi / Memorial ve Çevre Klinikler Koordinatörlüğü" },
-        { year: "2012 - 2018", title: "Üroloji Doçenti", institution: "Hisar Intercontinental Hospital & Akademik Kadro" },
-        { year: "2006 - 2012", title: "Yardımcı Doçent & Klinik Şef Yardımcısı", institution: "Üroloji Anabilim Dalı ve Eğitici Kadrosu" },
-        { year: "2000 - 2005", title: "Üroloji Uzmanlığı Eğitimi & İhtisas", institution: "İstanbul Üniversitesi İstanbul Tıp Fakültesi (Çapa Üroloji)" },
-        { year: "1993 - 1999", title: "Tıp Doktoru Eğitimi", institution: "Hacettepe Üniversitesi İngilizce Tıp Fakültesi" }
+        { year: "2025 - Günümüz", title: "Üroloji Profesörü", institution: "Üsküdar Üniversitesi Tıp Fakültesi" },
+        { year: "2020 - 2025", title: "Üroloji Doçenti & Öğretim Üyesi", institution: "Atlas, Galata ve Üsküdar Üniversiteleri" },
+        { year: "2010 - Günümüz", title: "Üroloji Kliniği Sorumlusu", institution: "Hisar Intercontinental Hospital" },
+        { year: "2002 - 2010", title: "Başhekim & Üroloji Uzmanı", institution: "Şebinkarahisar Devlet Hastanesi" },
+        { year: "1994 - 2002", title: "Tıp Eğitimi & Uzmanlık İhtisası", institution: "Ondokuz Mayıs Üniversitesi & Taksim Eğitim ve Araştırma Hastanesi" }
       ]
     : [
-        { year: "2018 - Present", title: "Professor of Urology", institution: "Faculty of Medicine / Chief of Urology, Affiliated Clinical Networks" },
-        { year: "2012 - 2018", title: "Associate Professor", institution: "Hisar Intercontinental Hospital & Academic Board" },
-        { year: "2006 - 2012", title: "Assistant Professor & Clinical Director", institution: "Department of Urology, Academic Training Hospital" },
-        { year: "2000 - 2005", title: "Residency & Specialty in Urology", institution: "Istanbul University, Istanbul Faculty of Medicine (Capa Urology)" },
-        { year: "1993 - 1999", title: "Doctor of Medicine (M.D.)", institution: "Hacettepe University Faculty of Medicine (English Medium)" }
+        { year: "2025 - Present", title: "Professor of Urology", institution: "Üsküdar University Faculty of Medicine" },
+        { year: "2020 - 2025", title: "Associate Professor & Faculty Member", institution: "Atlas, Galata, and Üsküdar Universities" },
+        { year: "2010 - Present", title: "Head of Urology Clinic", institution: "Hisar Intercontinental Hospital" },
+        { year: "2002 - 2010", title: "Chief Physician & Urology Specialist", institution: "Şebinkarahisar State Hospital" },
+        { year: "1994 - 2002", title: "Medical Education & Urology Residency", institution: "Ondokuz Mayıs University & Taksim Training and Research Hospital" }
       ];
 };
 

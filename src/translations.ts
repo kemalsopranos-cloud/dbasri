@@ -26,7 +26,7 @@ export const uiTranslations: Record<Language, Record<string, string>> = {
     aboutStatsExperience: "Yıllık Deneyim",
     aboutStatsPapers: "Uluslararası Makale",
     aboutMilestonesTitle: "Kariyer & Akademik Yolculuk",
-    aboutMilestoneDesc: "Hacettepe, İstanbul Üniversitesi ve uluslararası kliniklerde şekillenen, doçentlik ve profesörlük unvanlarıyla taçlanan 30 yılı aşkın tıp kariyeri.",
+    aboutMilestoneDesc: "Ondokuz Mayıs ve Üsküdar Üniversiteleri bünyesinde şekillenen, doçentlik ve profesörlük unvanlarıyla taçlanan 30 yılı aşkın tıp kariyeri.",
 
     sectionExpertiseTitle: "Tıbbi Uzmanlık Alanları",
     sectionExpertiseSubtitle: "Minimal İnvaziv Yöntemler ve Gelişmiş Cerrahi Çözümler",
@@ -121,7 +121,7 @@ export const uiTranslations: Record<Language, Record<string, string>> = {
     aboutStatsExperience: "Years of Experience",
     aboutStatsPapers: "International Publications",
     aboutMilestonesTitle: "Career & Academic Milestones",
-    aboutMilestoneDesc: "Over 30 years of premier medical practice shaped at Hacettepe, Istanbul University, and prominent global urology centers.",
+    aboutMilestoneDesc: "Over 30 years of premier medical practice shaped at Ondokuz Mayıs and Üsküdar Universities, honored with associate and full professorships.",
 
     sectionExpertiseTitle: "Medical Specialties",
     sectionExpertiseSubtitle: "Advanced Minimally Invasive & Complex Surgical Solutions",

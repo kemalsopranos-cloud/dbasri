@@ -47,34 +47,32 @@ export default function About({ language }: AboutProps) {
                 {t.aboutBioTitle}
               </h3>
               
-              <div className="space-y-4 text-slate-300 text-sm leading-relaxed font-light">
-                <p>
-                  {language === 'TR' ? (
-                    <>
-                      <strong>Prof. Dr. Basri Çakıroğlu</strong>, Türkiye'nin önde gelen üroloji uzmanlarındandır. Akademik tıp kariyerine 1993 yılında <strong>Hacettepe Üniversitesi İngilizce Tıp Fakültesi</strong>'nde başlamış, ardından <strong>İstanbul Üniversitesi İstanbul Tıp Fakültesi (Çapa)</strong>'nde üroloji uzmanlığı ihtisasını yüksek dereceyle tamamlamıştır.
-                    </>
-                  ) : (
-                    <>
-                      <strong>Prof. Dr. Basri Çakıroğlu</strong> is one of Turkey's foremost urological surgeons. He embarked on his elite medical journey at <strong>Hacettepe University Faculty of Medicine (English)</strong> in 1993, followed by a highly acclaimed residency and specialization at <strong>Istanbul University, Istanbul Faculty of Medicine (Capa Urology)</strong>.
-                    </>
-                  )}
-                </p>
-                
-                <p>
-                  {language === 'TR' ? (
-                    "Akademik araştırmalarını özellikle 'Kanser cerrahisinde sinirlerin korunması', 'Böbrek taşlarının lazerle milimetrik tedavisi' ve 'Robotik prostat ameliyatları' üzerinde yoğunlaştırmıştır. Doçentlik ve Profesörlük unvanlarını üstün klinik başarıları, cerrahi yenilikleri ve uluslararası tıp literatürüne sunduğu katkıları sayesinde almaya hak kazanmıştır."
-                  ) : (
-                    "His scientific and clinical research has concentrated extensively on nerve-sparing oncological surgery, precision laser stone fragmentation, and robotic prostatectomy. His associate professorship and full professorship were conferred in recognition of his superior surgical standards, instructional leadership, and contributions to international medical literature."
-                  )}
-                </p>
-
-                <p>
-                  {language === 'TR' ? (
-                    "Amacımız, her hastanın özgün fiziksel yapısını ve yaşam beklentilerini göz önüne alarak, cerrahi başarısı yüksek ve iyileşme konforu en üst seviyede olan kişiselleştirilmiş tedavi planları sunmaktır."
-                  ) : (
-                    "Our objective is to deliver bespoke treatment plans that respect each patient's unique anatomical variation and lifestyle goals, optimizing oncological success while maximizing post-surgical comfort."
-                  )}
-                </p>
+              <div className="space-y-4 text-slate-300 text-sm leading-relaxed font-light text-justify">
+                {language === 'TR' ? (
+                  <>
+                    <p>
+                      <strong>Prof. Dr. Basri Çakıroğlu</strong>, 1969 yılında Samsun’da doğmuştur. 1994 yılında <strong>Ondokuz Mayıs Üniversitesi Tıp Fakültesi</strong>’nden mezun olmuş, 2002 yılında <strong>Taksim Eğitim ve Araştırma Hastanesi</strong>’nde Üroloji ihtisasını tamamlamıştır. Kariyeri boyunca Şebinkarahisar Devlet Hastanesi’nde Başhekim ve Üroloji Uzmanı olarak görev almış, 2010 yılından itibaren <strong>Hisar Intercontinental Hospital</strong>’da Üroloji Kliniği Sorumlusu olarak çalışmaktadır.
+                    </p>
+                    <p>
+                      2020 yılında <strong>Üroloji Doçenti</strong> unvanını almış, Atlas Üniversitesi ve İstanbul Galata Üniversitesi'nde öğretim üyeliği yapmıştır. 12 Haziran 2025 tarihi itibariyle <strong>Üsküdar Üniversitesi Tıp Fakültesi Üroloji Anabilim Dalı</strong>’na Profesör kadrosuyla atanmıştır. 2023 yılından bu yana Üsküdar Üniversitesi’nde öğretim üyesi olarak görev yapmaktadır.
+                    </p>
+                    <p>
+                      İleri düzeyde İngilizce bilen Prof. Dr. Çakıroğlu’nun, ulusal ve uluslararası hakemli dergilerde yayımlanmış 30’dan fazla bilimsel makalesi bulunmaktadır. Türk Üroloji Derneği, Avrupa Üroloji Derneği, Endoüroloji Derneği, Avrasya Üroonkoloji Derneği ve Androloji Derneği üyesidir. Başlıca ilgi alanları arasında üroonkoloji, androloji, ve minimal invaziv ürolojik cerrahi yer almaktadır.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      <strong>Prof. Dr. Basri Çakıroğlu</strong> was born in Samsun in 1969. He graduated from <strong>Ondokuz Mayıs University Faculty of Medicine</strong> in 1994 and completed his residency in Urology at <strong>Taksim Training and Research Hospital</strong> in 2002. Throughout his career, he served as Chief Physician and Urology Specialist at Şebinkarahisar State Hospital, and since 2010, he has been working as the Head of the Urology Clinic at <strong>Hisar Intercontinental Hospital</strong>.
+                    </p>
+                    <p>
+                      He received the title of <strong>Associate Professor of Urology</strong> in 2020, and has served as a faculty member at Atlas University and Istanbul Galata University. As of June 12, 2025, he has been appointed as a <strong>Professor</strong> in the Department of Urology at <strong>Üsküdar University Faculty of Medicine</strong>. He has been serving as a faculty member at Üsküdar University since 2023.
+                    </p>
+                    <p>
+                      Prof. Dr. Çakıroğlu, who speaks advanced English, has published more than 30 scientific articles in national and international peer-reviewed journals. He is a member of the Turkish Urological Association, European Association of Urology, Endourology Society, Eurasian Urooncology Association, and Andrology Association. His primary areas of interest include urooncology, andrology, and minimally invasive urological surgery.
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Core Philosophy Bullets */}

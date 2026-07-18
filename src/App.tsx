@@ -13,12 +13,10 @@ import Expertise from './components/Expertise';
 import Blog from './components/Blog';
 import Contact from './components/Contact';
 import AppointmentModal from './components/AppointmentModal';
-import AppointmentHistory from './components/AppointmentHistory';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('TR');
   const [isAppointmentOpen, setIsAppointmentOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
 
@@ -143,6 +141,23 @@ export default function App() {
     }
   };
 
+  // Callback to confirm an existing session
+  const handleConfirmAppointment = async (id: string) => {
+    // 1. Optimistic UI update
+    setAppointments((prev) =>
+      prev.map((apt) => (apt.id === id ? { ...apt, status: 'confirmed' } : apt))
+    );
+
+    // 2. Update in Firestore
+    try {
+      await updateDoc(doc(db, 'appointments', id), {
+        status: 'confirmed'
+      });
+    } catch (e) {
+      console.error("Failed to confirm appointment in Firestore:", e);
+    }
+  };
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -166,9 +181,6 @@ export default function App() {
     });
   };
 
-  // Active appointments counter (excludes cancelled)
-  const activeAppointmentsCount = appointments.filter((a) => a.status !== 'cancelled').length;
-
   return (
     <div className="min-h-screen bg-navy text-slate-100 flex flex-col justify-between selection:bg-gold selection:text-navy font-sans">
       
@@ -177,8 +189,6 @@ export default function App() {
         language={language}
         setLanguage={setLanguage}
         onOpenAppointment={() => setIsAppointmentOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        appointmentCount={activeAppointmentsCount}
       />
 
       {/* MAIN VIEWPORT */}
@@ -199,7 +209,12 @@ export default function App() {
         <Expertise language={language} />
 
         {/* 5. SCIENTIFIC HEALTH BLOG */}
-        <Blog language={language} />
+        <Blog 
+          language={language} 
+          appointments={appointments}
+          onCancelAppointment={handleCancelAppointment}
+          onConfirmAppointment={handleConfirmAppointment}
+        />
 
         {/* 6. SECURE CONTACT & DIRECTION MAP */}
         <Contact language={language} />
@@ -284,14 +299,6 @@ export default function App() {
         isOpen={isAppointmentOpen}
         onClose={() => setIsAppointmentOpen(false)}
         onAppointmentCreated={handleAppointmentCreated}
-      />
-
-      <AppointmentHistory
-        language={language}
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        appointments={appointments}
-        onCancelAppointment={handleCancelAppointment}
       />
 
       {/* 9. FLOATING ACTION ACCESSORIES (BACK-TO-TOP & DIRECT-DIAL) */}

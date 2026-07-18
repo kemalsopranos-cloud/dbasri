@@ -8,16 +8,12 @@ interface HeaderProps {
   language: Language;
   setLanguage: (lang: Language) => void;
   onOpenAppointment: () => void;
-  onOpenHistory: () => void;
-  appointmentCount: number;
 }
 
 export default function Header({
   language,
   setLanguage,
   onOpenAppointment,
-  onOpenHistory,
-  appointmentCount,
 }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -90,20 +86,6 @@ export default function Header({
               <Instagram className="w-3.5 h-3.5 text-gold mr-1.5" />
               <span>Instagram</span>
             </a>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button
-              id="history-btn-top"
-              onClick={onOpenHistory}
-              className="text-slate-300 hover:text-gold transition-colors flex items-center"
-            >
-              <span>{t.navMyAppointments}</span>
-              {appointmentCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold bg-gold text-navy rounded-full animate-pulse">
-                  {appointmentCount}
-                </span>
-              )}
-            </button>
           </div>
         </div>
       </div>
@@ -236,24 +218,6 @@ export default function Header({
           </div>
 
           <div className="border-t border-white/10 pt-4 flex flex-col space-y-3">
-            <button
-              id="mobile-history-btn"
-              onClick={() => {
-                setIsOpen(false);
-                onOpenHistory();
-              }}
-              className="flex items-center justify-between w-full px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-md"
-            >
-              <span className="text-sm font-medium">{t.navMyAppointments}</span>
-              {appointmentCount > 0 ? (
-                <span className="px-2 py-0.5 text-xs font-bold bg-gold text-navy rounded-full">
-                  {appointmentCount}
-                </span>
-              ) : (
-                <span className="text-xs text-slate-500">0</span>
-              )}
-            </button>
-
             <button
               id="mobile-cta-appointment"
               onClick={() => {

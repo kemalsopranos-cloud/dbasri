@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, MouseEvent } from 'react';
 import { Search, Calendar, User, Clock, ArrowRight, X, ChevronRight, FileText, Plus, Trash2 } from 'lucide-react';
-import { Language, BlogPost } from '../types';
+import { Language, BlogPost, Appointment } from '../types';
 import { uiTranslations } from '../translations';
 import { getBlogPosts } from '../data';
 import AddArticleModal from './AddArticleModal';
@@ -9,9 +9,17 @@ import { collection, doc, setDoc, deleteDoc, onSnapshot, query, where } from 'fi
 
 interface BlogProps {
   language: Language;
+  appointments: Appointment[];
+  onCancelAppointment: (id: string) => Promise<void>;
+  onConfirmAppointment: (id: string) => Promise<void>;
 }
 
-export default function Blog({ language }: BlogProps) {
+export default function Blog({ 
+  language, 
+  appointments, 
+  onCancelAppointment, 
+  onConfirmAppointment 
+}: BlogProps) {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
@@ -406,6 +414,9 @@ export default function Blog({ language }: BlogProps) {
           onClose={() => setIsAddModalOpen(false)}
           onAdd={handleAddPost}
           existingCategories={categories}
+          appointments={appointments}
+          onCancelAppointment={onCancelAppointment}
+          onConfirmAppointment={onConfirmAppointment}
         />
       )}
     </section>

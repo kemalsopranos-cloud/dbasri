@@ -320,8 +320,8 @@ export default function Hero({
               <h3 className="text-white font-bold text-sm mb-1">{t.heroBadge1}</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-light">
                 {language === 'TR'
-                  ? 'Çapa Üroloji ekolüyle yetişmiş, binlerce başarılı operasyona imza atmış cerrah.'
-                  : 'Trained at Capa Urology, surgeon with thousands of highly successful cases.'}
+                  ? 'Akademik geçmişi ile binlerce başarılı operasyona imza atmış cerrah.'
+                  : 'With a distinguished academic background, surgeon with thousands of highly successful cases.'}
               </p>
             </div>
           </div>

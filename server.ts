@@ -76,6 +76,80 @@ async function startServer() {
     }
   });
 
+  // SEO: Dynamic XML Sitemap for Google Search Console
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const host = req.get('host') || 'basricakiroglu.com.tr';
+      const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+      const baseUrl = `${protocol}://${host}`;
+
+      const customPosts = await readPosts();
+      const defaultSlugs = [
+        'prostat-sagliginda-erken-teshis',
+        'holep-lazer-prostat-tedavisi',
+        'robotik-cerrahi-uroloji',
+        'bobrek-tasinda-kesisiz-lazer-tedavisi-rirs',
+        'kadinlarda-idrar-kacirma-tedavisi-tot'
+      ];
+
+      const allSlugs = new Set<string>();
+      defaultSlugs.forEach(s => allSlugs.add(s));
+      customPosts.forEach((p: any) => {
+        if (p.slug) allSlugs.add(p.slug);
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+      xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+      // 1. Homepage
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}/</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>1.0</priority>\n`;
+      xml += `  </url>\n`;
+
+      // 2. Dedicated SEO Blog Knowledge Hub
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}/blog</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>0.9</priority>\n`;
+      xml += `  </url>\n`;
+
+      // 3. Clinical & SEO Articles
+      allSlugs.forEach((slug) => {
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/blog/${slug}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.8</priority>\n`;
+        xml += `  </url>\n`;
+      });
+
+      xml += `</urlset>`;
+
+      res.setHeader('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (error) {
+      console.error('Error generating sitemap:', error);
+      res.status(500).send('Error generating sitemap');
+    }
+  });
+
+  // SEO: robots.txt
+  app.get('/robots.txt', (req, res) => {
+    const host = req.get('host') || 'basricakiroglu.com.tr';
+    const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const baseUrl = `${protocol}://${host}`;
+
+    const robots = `User-agent: *\nAllow: /\n\nSitemap: ${baseUrl}/sitemap.xml\n`;
+    res.setHeader('Content-Type', 'text/plain');
+    res.send(robots);
+  });
+
   // API: Send Appointment Mail Notifications
   app.post('/api/appointments', async (req, res) => {
     try {

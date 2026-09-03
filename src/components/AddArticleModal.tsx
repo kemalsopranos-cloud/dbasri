@@ -1,8 +1,9 @@
-import { useState, FormEvent } from 'react';
-import { X, FileText, AlertCircle, CheckCircle, Clock, Lock, ShieldCheck, Check, Phone, Mail, Calendar, MessageSquare, ListFilter } from 'lucide-react';
+import { useState, FormEvent, useEffect } from 'react';
+import { X, FileText, AlertCircle, CheckCircle, Clock, Lock, ShieldCheck, Check, Phone, Mail, Calendar, MessageSquare, ListFilter, Globe, Search, Tag } from 'lucide-react';
 import { Language, BlogPost, Appointment } from '../types';
 import { uiTranslations } from '../translations';
 import { getExpertiseItems } from '../data';
+import { generateSlug } from '../utils/seo';
 
 interface AddArticleModalProps {
   language: Language;
@@ -38,12 +39,27 @@ export default function AddArticleModal({
 
   // Form states
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isManualSlug, setIsManualSlug] = useState(false);
   const [category, setCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [readTime, setReadTime] = useState('5');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
+
+  // SEO fields
+  const [keywords, setKeywords] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [showSeoAdvanced, setShowSeoAdvanced] = useState(true);
+
+  // Auto-generate slug when title changes unless manually edited
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (!isManualSlug) {
+      setSlug(generateSlug(newTitle));
+    }
+  };
 
   // Validation states
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -104,10 +120,7 @@ export default function AddArticleModal({
     setErrors({});
 
     const finalCategory = (useCustomCategory ? customCategory : category).trim();
-    const cleanSlug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-');
+    const cleanSlug = slug.trim() ? generateSlug(slug.trim()) : generateSlug(title.trim());
     const uniqueId = `custom-article-${Date.now()}`;
 
     // Format current date appropriately
@@ -125,6 +138,8 @@ export default function AddArticleModal({
       readTime: readTime.trim(),
       category: finalCategory,
       author: language === 'TR' ? 'Prof. Dr. Basri Çakıroğlu' : 'Prof. Dr. Basri Cakiroglu',
+      keywords: keywords.trim(),
+      metaDescription: metaDescription.trim() || excerpt.trim(),
     };
 
     // Save and update
@@ -135,12 +150,16 @@ export default function AddArticleModal({
 
   const handleReset = () => {
     setTitle('');
+    setSlug('');
+    setIsManualSlug(false);
     setCategory('');
     setCustomCategory('');
     setUseCustomCategory(false);
     setReadTime('5');
     setExcerpt('');
     setContent('');
+    setKeywords('');
+    setMetaDescription('');
     setIsSuccess(false);
     setCreatedPost(null);
   };
@@ -350,7 +369,7 @@ export default function AddArticleModal({
                       <input
                         type="text"
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        onChange={(e) => handleTitleChange(e.target.value)}
                         placeholder={language === 'TR' ? 'Örn: Robotik Cerrahide Son Gelişmeler' : 'e.g. Advancements in Robotic Surgery'}
                         className={`w-full px-4 py-3 bg-white/5 text-white rounded border ${
                           errors.title ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-gold'
@@ -513,6 +532,101 @@ export default function AddArticleModal({
                           <span>{errors.content}</span>
                         </p>
                       )}
+                    </div>
+
+                    {/* SEO & Google Search Console Settings (Accordion / Card) */}
+                    <div className="card-glass p-5 rounded-xl border border-gold/30 bg-gradient-to-br from-white/5 via-gold/5 to-transparent space-y-4 font-sans">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div className="flex items-center space-x-2">
+                          <Globe className="w-4 h-4 text-gold" />
+                          <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                            {language === 'TR' ? 'Google Arama & SEO Ayarları' : 'Google Search & SEO Configuration'}
+                          </h4>
+                        </div>
+                        <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-medium">
+                          {language === 'TR' ? 'Google İndeksleme Hazır' : 'Index-Ready'}
+                        </span>
+                      </div>
+
+                      {/* Slug / URL Path */}
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-300">
+                          {language === 'TR' ? 'Sayfa Bağlantı Uzantısı (URL Slug)' : 'URL Slug'}
+                        </label>
+                        <div className="flex items-center rounded bg-white/5 border border-white/10 px-3 py-2 text-xs">
+                          <span className="text-slate-500 font-mono select-none">/blog/</span>
+                          <input
+                            type="text"
+                            value={slug}
+                            onChange={(e) => {
+                              setIsManualSlug(true);
+                              setSlug(generateSlug(e.target.value));
+                            }}
+                            placeholder="makale-basligi-url"
+                            className="bg-transparent text-gold font-mono text-xs w-full focus:outline-none pl-1"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-light">
+                          {language === 'TR'
+                            ? 'Google bu bağlantıyı dizine ekler. Türkçe karakterler ve boşluklar otomatik düzeltilir.'
+                            : 'Google will index this permanent path.'}
+                        </p>
+                      </div>
+
+                      {/* SEO Keywords */}
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-300 flex items-center justify-between">
+                          <span>{language === 'TR' ? 'Arama Anahtar Kelimeleri (Virgülle ayırın)' : 'Target SEO Keywords (Comma separated)'}</span>
+                          <Tag className="w-3 h-3 text-gold/70" />
+                        </label>
+                        <input
+                          type="text"
+                          value={keywords}
+                          onChange={(e) => setKeywords(e.target.value)}
+                          placeholder={language === 'TR' ? 'Örn: HoLEP ameliyatı, prostat büyümesi, lazer cerrahi, Basri Çakıroğlu' : 'e.g. HoLEP laser, prostate surgery, robotics'}
+                          className="w-full px-4 py-2.5 bg-white/5 text-white rounded border border-white/10 focus:outline-none focus:border-gold transition-all text-xs"
+                        />
+                      </div>
+
+                      {/* Meta Description */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-300">
+                            {language === 'TR' ? 'Google Arama Açıklaması (Meta Description)' : 'Meta Description'}
+                          </label>
+                          <span className={`text-[10px] ${metaDescription.length > 160 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>
+                            {metaDescription.length}/160 {language === 'TR' ? 'karakter (Önerilen: 120-160)' : 'chars'}
+                          </span>
+                        </div>
+                        <textarea
+                          value={metaDescription}
+                          onChange={(e) => setMetaDescription(e.target.value)}
+                          rows={2}
+                          maxLength={200}
+                          placeholder={language === 'TR' ? 'Google arama sonuçlarında başlığın altında çıkan 1-2 cümlelik açıklama...' : 'Search snippet appearing below title in Google...'}
+                          className="w-full px-4 py-2.5 bg-white/5 text-white rounded border border-white/10 focus:outline-none focus:border-gold transition-all text-xs resize-none font-light"
+                        />
+                      </div>
+
+                      {/* Live Google SERP Preview */}
+                      <div className="pt-2">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-2 flex items-center">
+                          <Search className="w-3 h-3 mr-1 text-gold" />
+                          {language === 'TR' ? 'Google Arama Sonucu Canlı Önizleme' : 'Live Google SERP Preview'}
+                        </p>
+                        <div className="bg-slate-900/90 border border-white/10 rounded-lg p-3.5 space-y-1">
+                          <div className="flex items-center space-x-1 text-[11px] text-slate-400">
+                            <span className="text-emerald-400">basricakiroglu.com.tr</span>
+                            <span>› blog › {slug || 'makale-baglantisi'}</span>
+                          </div>
+                          <div className="text-sm text-blue-400 font-medium hover:underline cursor-pointer leading-snug">
+                            {title.trim() ? `${title} | Prof. Dr. Basri Çakıroğlu` : 'Makale Başlığı | Prof. Dr. Basri Çakıroğlu'}
+                          </div>
+                          <div className="text-xs text-slate-300 font-light leading-relaxed line-clamp-2">
+                            {metaDescription.trim() || excerpt.trim() || 'Google arama sonuçlarında gösterilecek tıbbi makale özeti ve uzman hekim açıklaması.'}
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Form Submission Actions */}

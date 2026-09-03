@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, ChevronUp, Shield, Globe, FileText, Phone, Lock, Instagram } from 'lucide-react';
-import { Language, Appointment } from './types';
+import { Language, Appointment, BlogPost } from './types';
 import { uiTranslations } from './translations';
 import { db } from './firebase';
 import { collection, doc, setDoc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
@@ -10,15 +10,46 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
 import Expertise from './components/Expertise';
-import Blog from './components/Blog';
 import Contact from './components/Contact';
+import BlogPage from './components/BlogPage';
+import AddArticleModal from './components/AddArticleModal';
 import AppointmentModal from './components/AppointmentModal';
+import { updatePageSeo } from './utils/seo';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('TR');
   const [isAppointmentOpen, setIsAppointmentOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('basri_logged_in') === 'true');
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname;
+    }
+    return '/';
+  });
+
+  // Listen to browser forward/back buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update homepage SEO when on main route
+  useEffect(() => {
+    if (!currentPath.startsWith('/blog')) {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      updatePageSeo({
+        title: 'Prof. Dr. Basri Çakıroğlu | Üroloji & Robotik Cerrahi Uzmanı',
+        description: 'Prof. Dr. Basri Çakıroğlu - Üroloji ve Robotik Cerrahi Uzmanı. HoLEP lazer prostat tedavisi, daVinci robotik cerrahi, böbrek taşı ve ürolojik onkoloji.',
+        keywords: 'Prof Dr Basri Çakıroğlu, üroloji uzmanı istanbul, HoLEP lazer prostat ameliyatı, robotik cerrahi, böbrek taşı lazer, ürolojik onkoloji',
+        url: `${origin}/`
+      });
+    }
+  }, [currentPath, language]);
 
   // Sync login status across events
   useEffect(() => {
@@ -29,6 +60,26 @@ export default function App() {
     window.addEventListener('basri-login-state-changed', handleLoginState);
     return () => window.removeEventListener('basri-login-state-changed', handleLoginState);
   }, []);
+
+  // Listen for open-add-article custom event
+  useEffect(() => {
+    const handleOpenModal = () => setIsAddModalOpen(true);
+    window.addEventListener('open-add-article', handleOpenModal);
+    return () => window.removeEventListener('open-add-article', handleOpenModal);
+  }, []);
+
+  // Navigation helpers
+  const navigateToBlog = () => {
+    window.history.pushState({}, '', '/blog');
+    setCurrentPath('/blog');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToHome = () => {
+    window.history.pushState({}, '', '/');
+    setCurrentPath('/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Persistence: Real-time synchronization of appointments from Firestore
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
@@ -181,6 +232,61 @@ export default function App() {
     });
   };
 
+  const handleAddPost = async (newPost: BlogPost) => {
+    try {
+      await setDoc(doc(db, 'blog_posts', newPost.id), {
+        title: newPost.title,
+        slug: newPost.slug,
+        excerpt: newPost.excerpt,
+        content: newPost.content,
+        date: newPost.date,
+        readTime: newPost.readTime,
+        category: newPost.category,
+        author: newPost.author,
+        keywords: newPost.keywords || '',
+        metaDescription: newPost.metaDescription || '',
+        language: language,
+        createdAt: Date.now()
+      });
+      try {
+        await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newPost)
+        });
+      } catch (err) {
+        console.warn('Could not sync post to server /api/posts:', err);
+      }
+    } catch (e) {
+      console.error('Firestore write error:', e);
+    }
+  };
+
+  // IF ON /blog OR /blog/:slug ROUTE, SERVE DEDICATED SEO BLOG HUB
+  if (currentPath.startsWith('/blog')) {
+    const slug = currentPath.replace('/blog', '').replace(/^\//, '') || undefined;
+    return (
+      <>
+        <BlogPage
+          language={language}
+          setLanguage={setLanguage}
+          onNavigateHome={navigateToHome}
+          onOpenAppointment={() => setIsAppointmentOpen(true)}
+          initialSlug={slug}
+          appointments={appointments}
+          onCancelAppointment={handleCancelAppointment}
+          onConfirmAppointment={handleConfirmAppointment}
+        />
+        <AppointmentModal
+          language={language}
+          isOpen={isAppointmentOpen}
+          onClose={() => setIsAppointmentOpen(false)}
+          onAppointmentCreated={handleAppointmentCreated}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-navy text-slate-100 flex flex-col justify-between selection:bg-gold selection:text-navy font-sans">
       
@@ -208,20 +314,12 @@ export default function App() {
         {/* 4. CLINICAL EXPERTISE GRID */}
         <Expertise language={language} />
 
-        {/* 5. SCIENTIFIC HEALTH BLOG */}
-        <Blog 
-          language={language} 
-          appointments={appointments}
-          onCancelAppointment={handleCancelAppointment}
-          onConfirmAppointment={handleConfirmAppointment}
-        />
-
-        {/* 6. SECURE CONTACT & DIRECTION MAP */}
+        {/* 5. SECURE CONTACT & DIRECTION MAP */}
         <Contact language={language} />
 
       </main>
 
-      {/* 7. SECURE ACADEMIC FOOTER */}
+      {/* 6. SECURE ACADEMIC FOOTER */}
       <footer className="bg-black/30 border-t border-white/5 py-12 px-6 relative z-10 text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
           
@@ -257,10 +355,11 @@ export default function App() {
                 {t.navExpertise}
               </button>
               <button
-                onClick={() => scrollToSection('blog')}
+                id="footer-nav-blog"
+                onClick={navigateToBlog}
                 className="hover:text-gold transition-colors focus:outline-none cursor-pointer"
               >
-                {t.navBlog}
+                {language === 'TR' ? 'Tıbbi Yayınlar (Blog)' : 'Medical Blog'}
               </button>
               <button
                 onClick={() => scrollToSection('contact')}
@@ -273,7 +372,7 @@ export default function App() {
             {/* Author Portal Trigger */}
             <button
               id="footer-doctor-login"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-add-article'))}
+              onClick={() => setIsAddModalOpen(true)}
               className="flex items-center space-x-2 px-5 py-2.5 bg-gold/10 hover:bg-gold/20 active:bg-gold/30 border border-gold/30 hover:border-gold/50 text-gold rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer focus:outline-none shrink-0"
               title={language === 'TR' ? 'Hekim & Yazar Giriş Paneli' : 'Doctor & Author Login Portal'}
             >
@@ -285,7 +384,7 @@ export default function App() {
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5" />
-                  <span>{language === 'TR' ? 'Giriş' : 'Login'}</span>
+                  <span>{language === 'TR' ? 'Hekim Girişi' : 'Doctor Login'}</span>
                 </>
               )}
             </button>
@@ -293,13 +392,25 @@ export default function App() {
         </div>
       </footer>
 
-      {/* 8. PERSISTENT INTERACTIVE MODALS */}
+      {/* 7. PERSISTENT INTERACTIVE MODALS */}
       <AppointmentModal
         language={language}
         isOpen={isAppointmentOpen}
         onClose={() => setIsAppointmentOpen(false)}
         onAppointmentCreated={handleAppointmentCreated}
       />
+
+      {isAddModalOpen && (
+        <AddArticleModal
+          language={language}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddPost}
+          existingCategories={['Onkoloji', 'Lazer Cerrahi', 'Teknoloji', 'Taş Hastalıkları', 'Kadın Ürolojisi']}
+          appointments={appointments}
+          onCancelAppointment={handleCancelAppointment}
+          onConfirmAppointment={handleConfirmAppointment}
+        />
+      )}
 
       {/* 9. FLOATING ACTION ACCESSORIES (BACK-TO-TOP & DIRECT-DIAL) */}
       <div className="fixed bottom-6 right-6 flex flex-col space-y-3 z-30">

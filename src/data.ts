@@ -258,7 +258,7 @@ export const getExpertiseItems = (lang: 'TR' | 'EN'): ExpertiseItem[] => {
       ];
 };
 
-// 3 High-Quality Blog Posts (Requested by prompt)
+// High-Quality Clinical & SEO Blog Posts
 export const getBlogPosts = (lang: 'TR' | 'EN'): BlogPost[] => {
   return lang === 'TR'
     ? [
@@ -271,6 +271,8 @@ export const getBlogPosts = (lang: 'TR' | 'EN'): BlogPost[] => {
           date: "10 Haziran 2026",
           readTime: "5",
           author: "Prof. Dr. Basri Çakıroğlu",
+          keywords: "prostat kanseri erken tanı, PSA testi, multiparametrik MR biyopsi, üroloji uzmanı istanbul, Prof Dr Basri Çakıroğlu",
+          metaDescription: "Prostat kanseri ve PSA testi hakkında kapsamlı rehber. Belirtiler, risk faktörleri ve füzyon biyopsi yöntemleri - Prof. Dr. Basri Çakıroğlu.",
           content: `### Prostat Kanseri Belirti Vermeden İlerleyebilir
 Prostat kanseri, erken evrelerde genellikle hiçbir klinik şikayete yol açmaz. Sık idrara çıkma, idrarda kan görülmesi veya ağrı gibi belirtiler genellikle hastalık ileri aşamalara ulaştığında ya da iyi huylu prostat büyümesi ile birlikte seyrettiğinde ortaya çıkar. Bu nedenle, hiçbir şikayeti olmayan erkeklerin de düzenli tarama yaptırması hayati öneme sahiptir.
 
@@ -293,6 +295,8 @@ Eğer PSA testinde veya muayenede şüpheli bir bulguya rastlanırsa, günümüz
           date: "22 Mayıs 2026",
           readTime: "6",
           author: "Prof. Dr. Basri Çakıroğlu",
+          keywords: "HoLEP ameliyatı, holmium lazer prostat, prostat büyümesi tedavisi, kesisiz prostat ameliyatı, Basri Çakıroğlu HoLEP",
+          metaDescription: "HoLEP lazer prostat ameliyatı avantajları, iyileşme süreci ve cinsel fonksiyonların korunması. Prof. Dr. Basri Çakıroğlu bilgilendiriyor.",
           content: `### İyi Huylu Prostat Büyümesi (BPH) Nedir?
 50 yaşın üzerindeki erkeklerin yarısından fazlasında görülen iyi huylu prostat büyümesi; idrar yaparken zorlanma, idrar hızında azalma, geceleri sık sık idrara çıkma ve mesaneyi tam boşaltamama hissiyle kendini gösterir. İlaç tedavilerinin yetersiz kaldığı durumlarda cerrahi müdahale gereklidir.
 
@@ -315,6 +319,8 @@ HoLEP (Holmium Laser Enucleation of the Prostate), yüksek güçlü Holmiyum laz
           date: "14 Nisan 2026",
           readTime: "7",
           author: "Prof. Dr. Basri Çakıroğlu",
+          keywords: "robotik cerrahi üroloji, daVinci robotik prostatektomi, prostat kanseri robotik ameliyatı, Basri Çakıroğlu robotik cerrahi",
+          metaDescription: "daVinci robotik cerrahi ile ürolojik kanser operasyonları. Hızlı iyileşme, idrar tutma ve ereksiyon sinirlerinin korunması - Prof. Dr. Basri Çakıroğlu.",
           content: `### Robotik Cerrahi Nedir?
 Robotik cerrahi veya robot yardımlı cerrahi, hastanın vücudunda açılan birkaç küçük delikten (0.8 - 1 cm) yerleştirilen robotik kolların, cerrah tarafından özel bir konsol aracılığıyla kontrol edildiği kapalı ameliyat yöntemidir. Ürolojide özellikle prostat, böbrek ve mesane kanserlerinin tedavisinde dünya çapında en çok tercih edilen yöntem haline gelmiştir.
 
@@ -328,6 +334,58 @@ Robotik cerrahi veya robot yardımlı cerrahi, hastanın vücudunda açılan bir
 2. **Hızlı Taburculuk ve Günlük Hayata Dönüş:** Hastalar genellikle ameliyatın ertesi günü ayağa kalkar ve birkaç gün içinde taburcu edilerek sosyal hayatlarına dönebilirler.
 3. **Kanserli Dokunun Tam Temizlenmesi (Negatif Cerrahi Sınır):** Yüksek görüş gücü, kanserli dokunun etrafındaki sağlıklı sınırlardan temiz bir şekilde ayrılmasını sağlar.
 4. **Hayati Fonksiyonların Korunması:** Prostat kanseri ameliyatlarında prostatın hemen yanından geçen idrar tutma ve sertleşme sinirleri (ereksiyon sinirleri) robotun hassasiyeti sayesinde korunur. Böylece ameliyat sonrasında idrar kaçırma ve iktidarsızlık gibi istenmeyen yan etkiler en aza indirilir.`
+        },
+        {
+          id: "kidney-stone-laser-rirs",
+          title: "Böbrek Taşında Kesisiz Tedavi: Lazerle Taş Kırma (RIRS)",
+          slug: "bobrek-tasinda-kesisiz-lazer-tedavisi-rirs",
+          excerpt: "Hiçbir cerrahi kesi yapılmadan idrar kanalından böbreğe ulaşılarak uygulanan Flexible RIRS yöntemiyle böbrek taşları toza dönüştürülür.",
+          category: "Taş Hastalıkları",
+          date: "28 Mart 2026",
+          readTime: "5",
+          author: "Prof. Dr. Basri Çakıroğlu",
+          keywords: "böbrek taşı lazer kırma, RIRS ameliyatı, flexible üreteroskopi, böbrek taşı ağrısı, Prof Dr Basri Çakıroğlu",
+          metaDescription: "Kesisiz, dikişsiz böbrek taşı tedavisi: Flexible URS ve Lazerle Taş Kırma (RIRS). İyileşme süreci ve taş dökme aşamaları - Prof. Dr. Basri Çakıroğlu.",
+          content: `### Böbrek Taşı Neden Oluşur ve Nasıl Belirti Verir?
+Böbrek taşları, idrarda kalsiyum, oksalat veya ürik asit gibi kristallerin birikip birleşmesiyle meydana gelir. Yetersiz sıvı tüketimi, genetik yatkınlık ve beslenme alışkanlıkları en büyük tetikleyicilerdir. Tipik olarak bele ve kasıklara vuran şiddetli kıvrandırıcı ağrı, bulantı ve idrarda kanama ile kendini gösterir.
+
+### Kesisiz Lazer Yöntemi (RIRS) Nedir?
+RIRS (Retrograd İntrarenal Cerrahi), kıvrılabilen (flexible) çok ince optik aletlerle idrar deliğinden girilip, mesane ve idrar kanalını geçerek doğrudan böbreğin içine ulaşılmasıdır. Dışarıdan vücutta hiçbir kesi, yara veya dikiş bulunmaz.
+
+### Holmium Lazer ile Tozlaştırma
+Böbrek içindeki taşa ulaşıldığında, milimetrik lazer fiberi kullanılarak taş adeta kum tanelerine veya toza dönüştürülür. Bu sayede hastalar işlem sonrası büyük taş parçaları düşürme sancısı yaşamazlar.
+
+### RIRS Yönteminin Sağladığı Kolaylıklar:
+* Vücutta kesi olmaması nedeniyle enfeksiyon riski çok düşüktür.
+* Kanama riski minimaldir.
+* Hastalar aynı gün veya ertesi sabah normal iş ve sosyal hayatlarına dönebilirler.
+* Böbrek dokusuna zarar vermeden, böbreğin alt odacıklarındaki (kaliks) en zorlu taşlara bile güvenle ulaşılır.`
+        },
+        {
+          id: "female-incontinence-solutions",
+          title: "Kadınlarda İdrar Kaçırma: Nedenleri ve Modern Askı Ameliyatları (TOT)",
+          slug: "kadinlarda-idrar-kacirma-tedavisi-tot",
+          excerpt: "Öksürme, gülme veya ağır kaldırma sırasında idrar kaçırma kader değildir. 15-20 dakikalık modern askı operasyonları ile kalıcı konfor sağlanır.",
+          category: "Kadın Ürolojisi",
+          date: "12 Mart 2026",
+          readTime: "5",
+          author: "Prof. Dr. Basri Çakıroğlu",
+          keywords: "kadınlarda idrar kaçırma, TOT ameliyatı, mesane sarkması tedavisi, idrar kaçırma ameliyatı istanbul, Basri Çakıroğlu",
+          metaDescription: "Kadınlarda öksürünce idrar kaçırma (stres inkontinans) nedenleri ve modern TOT askı ameliyatı ile kalıcı tedavi - Prof. Dr. Basri Çakıroğlu.",
+          content: `### İdrar Kaçırma Normal Bir Yaşlanma Süreci Değildir
+Pek çok kadın, özellikle doğum sonrasında veya menopoz döneminde gülünce, hapşırınca, öksürünce veya spor yaparken idrar kaçırmayı normal ve kaçınılmaz bir durum olarak görebilmektedir. Oysa bu durum tıp dilinde 'Stres Üriner İnkontinans' olarak adlandırılan ve tedavisi son derece yüz güldürücü olan bir rahatsızlıktır.
+
+### En Sık Görülen İdrar Kaçırma Türleri
+1. **Stres İnkontinans:** Karın içi basıncın arttığı anlarda (öksürme, zıplama, gülme) idrar torbası boynunu destekleyen pelvik kasların gevşemesi sonucu kaçırma.
+2. **Sıkışma (Urge) Tipi İnkontinans:** Aniden gelen tuvalete yetişememe hissi ve aşırı aktif mesane.
+3. **Mikst Tip:** Her iki tablonun bir arada görülmesi.
+
+### TOT (Transobturator Tape) Askı Yöntemi ile Kalıcı Çözüm
+Günümüzde stres tipi idrar kaçırmada altın standart cerrahi tedavi TOT askı operasyonudur:
+* **Hızlı ve Konforlu:** Yaklaşık 15-20 dakika süren, küçük bir operasyondur.
+* **Görünmeyen Kesi:** İdrar yolunun hemen altına yerleştirilen sentetik doku dostu bir meş (bant) ile idrar kanalı desteklenir.
+* **Yüksek Başarı Oranı:** Başarı oranı %90'ın üzerindedir.
+* **Kısa İyileşme:** Hastalar genellikle operasyonun ertesi günü günlük aktivitelerine geri dönebilirler.`
         }
       ]
     : [

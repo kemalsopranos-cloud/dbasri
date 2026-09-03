@@ -27,6 +27,8 @@ export interface BlogPost {
   category: string;
   author: string;
   language?: Language;
+  keywords?: string;
+  metaDescription?: string;
 }
 
 export interface Appointment {

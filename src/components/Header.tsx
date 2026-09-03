@@ -31,7 +31,6 @@ export default function Header({
     { label: t.navHome, id: 'home' },
     { label: t.navAbout, id: 'about' },
     { label: t.navExpertise, id: 'expertise' },
-    { label: t.navBlog, id: 'blog' },
     { label: t.navContact, id: 'contact' },
   ];
 
